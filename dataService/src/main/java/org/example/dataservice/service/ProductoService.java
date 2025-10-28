@@ -29,6 +29,9 @@ public class ProductoService {
                     .orElseThrow(() -> new RecursoNoEncontradoException("Categoria "+p.getCategoria().getId()+" no existe"));
             p.setCategoria(cat);
         }
+        if (p.getInventario() != null && p.getInventario().getProducto() == null) {
+            p.getInventario().setProducto(p);
+        }
         return productoRepo.save(p);
     }
 
@@ -40,6 +43,12 @@ public class ProductoService {
         if (dto.getCategoria()!=null && dto.getCategoria().getId()!=null){
             p.setCategoria(categoriaRepo.findById(dto.getCategoria().getId())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Categoria "+dto.getCategoria().getId()+" no existe")));
+        }
+        if (dto.getInventario() != null) {
+            if (dto.getInventario().getProducto() == null) {
+                dto.getInventario().setProducto(p);
+            }
+            p.setInventario(dto.getInventario());
         }
         return p;
     }
