@@ -13,14 +13,17 @@ import java.util.List;
 public class ProductoService {
     private final ProductoRepository productoRepo;
     private final CategoriaRepository categoriaRepo;
-
     public ProductoService(ProductoRepository p, CategoriaRepository c){ this.productoRepo=p; this.categoriaRepo=c; }
 
-    @Transactional(readOnly = true) public List<Producto> obtenerTodos(){ return productoRepo.findAll(); }
+    @Transactional(readOnly = true) 
+    public List<Producto> obtenerTodos(){ 
+        return productoRepo.findAll();
+    }
 
     @Transactional(readOnly = true)
     public Producto buscarPorId(Long id){
-        return productoRepo.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Producto "+id+" no existe"));
+        return productoRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto "+id+" no existe"));
     }
 
     public Producto guardar(Producto p){
@@ -29,13 +32,14 @@ public class ProductoService {
                     .orElseThrow(() -> new RecursoNoEncontradoException("Categoria "+p.getCategoria().getId()+" no existe"));
             p.setCategoria(cat);
         }
+        // Asegurar la consistencia de la relación bidireccional Producto <-> Inventario
         if (p.getInventario() != null && p.getInventario().getProducto() == null) {
             p.getInventario().setProducto(p);
         }
         return productoRepo.save(p);
     }
 
-    public Producto actualizar(Long id, Producto dto){
+public Producto actualizar(Long id, Producto dto){
         Producto p = buscarPorId(id);
         p.setNombre(dto.getNombre());
         p.setDescripcion(dto.getDescripcion());
@@ -44,6 +48,7 @@ public class ProductoService {
             p.setCategoria(categoriaRepo.findById(dto.getCategoria().getId())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Categoria "+dto.getCategoria().getId()+" no existe")));
         }
+  }
         if (dto.getInventario() != null) {
             if (dto.getInventario().getProducto() == null) {
                 dto.getInventario().setProducto(p);
